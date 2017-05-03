@@ -3,8 +3,10 @@ import random
 import copy
 
 
+# Class that makes up the population
 class individual():
 
+    # Just using strings to represent the bits
     def __init__(self, value='0000' ):
         self.fitness = 0 # integer
         self.value = value # string
@@ -12,6 +14,8 @@ class individual():
         self.intValue = int(value, 2)
         self.updateFitness()
 
+    # Function that basically just switches the bit values in the string x if the mutation string y says to
+    # Not great but it works
     def bitSwitch(self, x, y):
         x = list(x)
         y = list(y)
@@ -24,47 +28,39 @@ class individual():
         return ''.join(x)
 
 
-    def mutate(self):   # right now does 50% mutation rate, hope to make it more later
+    # Mutate function to decide if the bit should be mutated aka switched
+    # uses a random number in range 0,1 to decide, so basically 50% of bits get mutated in an individual
+    def mutate(self):   
         mutateString = ''
         for i in range(0, self.binaryLength) :
             mutateString += str(random.randint(0,1))
         self.value = self.bitSwitch(self.value, mutateString)
         self.updateFitness()
         return
-        # mutateString = ''
-        # for i in range(0, self.maxBinaryLength) :
-        #     mutateString += str(random.randint(0,1))
-        #
-        # print(bin(int(mutateString, 2 )))
-        # print(bin(self.value))
-        #
-        # self.value = int(bin(self.value & int(mutateString, 2 )), 2 )
 
+    # This is where you would put the function to calculate fitness, for this
+    #   example im just going to use the int value for the bits
     def updateFitness(self):
-        # this is where you would put the function to calculate fitness, for this
-        # example im just going to use the int value for the bits
         self.fitness = int(self.value, 2 )
 
-
-
+# Actual class that will run the algorithm 
 class GeneticAlgorithm():
 
+    # Initialize the variables for the algo
     def __init__(self, populationSize=10, indiviuals=[]):
         self.populationSize = populationSize
         self.individuals = []
 
+    # Generates random individuals for the population size 
     def generateRandomIndividuals(self):
-        # genereates a random set of starting individuals
         while len(self.individuals) < self.populationSize:
             val = ''.join([random.choice('10') for _ in range(4)])
             print(val)
             self.individuals.append(individual(value=val))
         return
 
+    # Crosses two individuals it takes as parameters to make a new individual and mutates it
     def crossover(self, x, y):
-        #x,y are indiviuals of class individual
-        # returns new individual
-
         binaryLength= x.binaryLength
         halfLength = binaryLength / 2
         x = list(x.value)
@@ -82,9 +78,11 @@ class GeneticAlgorithm():
             for l in range(halfLength, binaryLength):
                 crossoverList.append(x[l])
         newInd = individual(value=''.join(crossoverList))
+        # Mutate the new individual
         newInd.mutate()
         return newInd
 
+    # Selects two random individuals from the population 
     def selection(self):
         # returns two random individuals from the list
         listCopy = copy.deepcopy(self.individuals)
@@ -92,6 +90,8 @@ class GeneticAlgorithm():
         b = listCopy.pop(random.randint(0, len(listCopy)-1))
         return a, b
 
+    # Runs the algorithm for a certain number of iterations optimizing the population based on fitness
+    #   epochs is a bad variable name here, cause it doesnt really go over the whole population, just picks two 
     def run(self, epochs=10):
         iterations = 0
         while iterations<epochs:
@@ -103,45 +103,3 @@ class GeneticAlgorithm():
             self.individuals.pop()
             iterations += 1
         return
-
-
-
-
-
-# binary in python
-# a = int('1000', 2)
-# print(bin(a & int('1110', 2)))
-# print(a.bit_length())
-# print("Radansdfjasdf", random.randint(0,12)))
-# print(''.join([random.choice('10') for _ in range(4)]))
-#
-# print(bin(0b101 & 0b1111))
-# print("yert?", 0b101.bit_length())
-#
-# print("random", random.randint(0, 15))
-# print(bin(random.randint(0, 15)))
-
-
-
-g = GeneticAlgorithm()
-g.generateRandomIndividuals()
-g.run(epochs=10)
-
-
-for i in range(0, len(g.individuals)):
-    print(g.individuals[i].value, g.individuals[i].fitness)
-
-
-# b = [a,m,d]
-# b.sort()
-# b.sort(key=lambda x: x.fitness, reverse=True)
-# print(b[0].value, b[1].value, b[2].value)
-
-# a = [1,2,3,4]
-# print(a.pop(1))
-# print(a)
-
-# print(m.fitness)
-# print(m.value)
-# m.mutate()
-# print(m.value)
